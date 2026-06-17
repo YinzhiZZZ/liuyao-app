@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /c/AppProject/liuyao-app && git push origin master:main 2>&1)",
+      "Bash(cd /c/AppProject/liuyao-app && git fetch origin && git rebase origin/main 2>&1)",
+      "Bash(cd /c/AppProject/liuyao-app && git add . && git commit --amend --no-edit 2>&1)"
+    ]
+  }
+}

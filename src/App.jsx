@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
+// ── 易学数据 ──────────────────────────────────────────────
 const BAGUA = [
   { name: "乾", symbol: "☰", lines: [1,1,1], nature: "天", element: "金" },
   { name: "兑", symbol: "☱", lines: [1,1,0], nature: "泽", element: "金" },
@@ -52,6 +53,7 @@ function getBagua(threeLines) {
   ) || BAGUA[7];
 }
 
+// ── 子组件 ────────────────────────────────────────────────
 function CoinFlip({ onResult }) {
   const [spinning, setSpinning] = useState(false);
   const [coins, setCoins] = useState([null, null, null]);
@@ -66,44 +68,44 @@ function CoinFlip({ onResult }) {
         Math.random() > 0.5 ? 3 : 2,
         Math.random() > 0.5 ? 3 : 2,
       ];
-      const total = c.reduce((a, b) => a + b, 0);
       setCoins(c);
       setSpinning(false);
-      onResult(total);
-    }, 800);
+      onResult(c.reduce((a, b) => a + b, 0));
+    }, 700);
   };
 
   return (
-    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"12px" }}>
-      <div style={{ display:"flex", gap:"16px" }}>
+    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"14px" }}>
+      <div style={{ display:"flex", gap:"18px" }}>
         {[0,1,2].map(i => (
           <div key={i} style={{
-            width:"52px", height:"52px", borderRadius:"50%",
+            width:"54px", height:"54px", borderRadius:"50%",
             background: coins[i] === null
-              ? "rgba(180,140,60,0.2)"
+              ? "rgba(180,140,60,0.15)"
               : coins[i] === 3
                 ? "radial-gradient(circle at 35% 35%, #f5d060, #b8860b)"
                 : "radial-gradient(circle at 35% 35%, #c8a040, #7a5c10)",
-            border:"2px solid rgba(180,140,60,0.6)",
+            border: `2px solid ${coins[i] === null ? "rgba(180,140,60,0.3)" : "rgba(255,215,0,0.7)"}`,
             display:"flex", alignItems:"center", justifyContent:"center",
-            fontSize:"18px", fontWeight:"bold",
-            boxShadow: coins[i] !== null ? "0 4px 12px rgba(180,140,60,0.4)" : "none",
-            transition:"all 0.3s",
-            color: coins[i] !== null ? "#fff8e0" : "transparent",
+            fontSize:"16px", fontWeight:"bold", color:"#fff8e0",
+            boxShadow: coins[i] !== null ? "0 4px 16px rgba(180,140,60,0.5)" : "none",
+            transition:"all 0.4s",
+            transform: spinning ? "rotateY(180deg)" : "rotateY(0deg)",
           }}>
             {coins[i] === null ? "" : coins[i] === 3 ? "正" : "反"}
           </div>
         ))}
       </div>
       <button onClick={flip} disabled={spinning} style={{
-        padding:"10px 28px",
-        background: spinning ? "rgba(180,140,60,0.2)" : "linear-gradient(135deg, #c8960c, #8B6914)",
-        border:"1px solid rgba(180,140,60,0.5)", borderRadius:"4px",
-        color: spinning ? "rgba(255,220,100,0.4)" : "#ffd700",
+        padding:"11px 32px",
+        background: spinning ? "rgba(180,140,60,0.15)" : "linear-gradient(135deg, #c8960c, #8B6914)",
+        border:"1px solid rgba(180,140,60,0.5)", borderRadius:"3px",
+        color: spinning ? "rgba(255,220,100,0.4)" : "#fff8e0",
         cursor: spinning ? "wait" : "pointer",
-        fontSize:"14px", letterSpacing:"3px", fontFamily:"inherit",
+        fontSize:"14px", letterSpacing:"4px", fontFamily:"inherit",
+        transition:"all 0.2s",
       }}>
-        {spinning ? "卜中..." : "掷卦"}
+        {spinning ? "卜中…" : "掷　卦"}
       </button>
     </div>
   );
@@ -111,45 +113,268 @@ function CoinFlip({ onResult }) {
 
 function HexagramDisplay({ lines, animated }) {
   return (
-    <div style={{ display:"flex", flexDirection:"column-reverse", gap:"6px", alignItems:"center" }}>
+    <div style={{ display:"flex", flexDirection:"column-reverse", gap:"7px", alignItems:"center" }}>
       {lines.map((line, i) => (
         <div key={i} style={{
           display:"flex", alignItems:"center", gap:"10px",
-          opacity: animated ? 1 : 0,
-          animation: animated ? `fadeIn 0.3s ease ${i * 0.12}s both` : "none",
+          animation: animated ? `fadeUp 0.35s ease ${i * 0.1}s both` : "none",
         }}>
-          <span style={{ fontSize:"11px", color:"rgba(180,140,60,0.5)", width:"24px", textAlign:"right", fontFamily:"serif" }}>
-            {["初","二","三","四","五","上"][i]}爻
+          <span style={{ fontSize:"11px", color:"rgba(180,140,60,0.45)", width:"24px", textAlign:"right" }}>
+            {["初","二","三","四","五","上"][i]}
           </span>
           {line.yin ? (
-            <div style={{ display:"flex", gap:"6px" }}>
-              <div style={{ width:"34px", height:"8px", background: line.changing ? "#ff8c00" : "#c8960c", borderRadius:"2px" }} />
-              <div style={{ width:"6px" }} />
-              <div style={{ width:"34px", height:"8px", background: line.changing ? "#ff8c00" : "#c8960c", borderRadius:"2px" }} />
+            <div style={{ display:"flex", gap:"7px" }}>
+              <div style={{ width:"32px", height:"8px", background: line.changing ? "#ff8c00" : "#b8860b", borderRadius:"2px" }} />
+              <div style={{ width:"7px" }} />
+              <div style={{ width:"32px", height:"8px", background: line.changing ? "#ff8c00" : "#b8860b", borderRadius:"2px" }} />
             </div>
           ) : (
-            <div style={{ width:"74px", height:"8px", background: line.changing ? "#ff8c00" : "#ffd700", borderRadius:"2px" }} />
+            <div style={{ width:"71px", height:"8px", background: line.changing ? "#ff8c00" : "#ffd700", borderRadius:"2px" }} />
           )}
-          {line.changing && <span style={{ fontSize:"11px", color:"#ff8c00" }}>○</span>}
+          {line.changing && <span style={{ fontSize:"10px", color:"#ff8c00" }}>○</span>}
         </div>
       ))}
     </div>
   );
 }
 
-export default function App() {
-  const [phase, setPhase] = useState("intro");
+// ── 签文页组件 ────────────────────────────────────────────
+function SignPage({ hexName, lowerGua, upperGua, hasChanging, changedHexName, lines, castLines, onNext }) {
+  const [signText, setSignText] = useState("");
+  const [signSource, setSignSource] = useState("");
+  const [loading, setLoading] = useState(true);
   const [question, setQuestion] = useState("");
+
+  useEffect(() => {
+    fetchSign();
+  }, []);
+
+  const fetchSign = async () => {
+    const prompt = `你是一位精通周易的易学大师。现已起得【${hexName}】，上卦${upperGua.name}（${upperGua.nature}），下卦${lowerGua.name}（${lowerGua.nature}）${hasChanging ? `，变卦为${changedHexName}` : "，无动爻"}。
+
+请为此卦创作一首签文判词，要求：
+1. 仿古签文风格，文辞古雅，带有玄学神秘色彩，四句，每句五到七字
+2. 内容须契合此卦卦象与象意，不可泛泛而谈
+3. 尽量引用或化用真实易学典籍（如《周易》《梅花易数》《增删卜易》等）的语意，并在最后标注出处（格式：——出自《xxx》）；若无合适出处则不标注
+4. 只输出签文正文四句加出处，不要任何解释、标题或多余文字
+5. 每句之间用换行分隔
+
+示例格式：
+云开日出见光明
+险处藏机莫轻行
+静守中正待时至
+福至心灵自然成
+——化自《周易·坎卦》`;
+
+    try {
+      const resp = await fetch("/api/chat", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await resp.json();
+      const text = (data.result || "").trim();
+      // 分离出处
+      const lines = text.split("\n").filter(l => l.trim());
+      const sourceLine = lines.find(l => l.startsWith("——") || l.startsWith("—"));
+      const bodyLines = lines.filter(l => !l.startsWith("——") && !l.startsWith("—"));
+      setSignText(bodyLines.join("\n"));
+      setSignSource(sourceLine || "");
+    } catch {
+      setSignText("山重水复疑无路\n柳暗花明又一村\n静待天时莫强求\n顺势而为自有缘");
+      setSignSource("");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signLines = signText.split("\n").filter(l => l.trim());
+
+  return (
+    <div style={{ animation:"fadeUp 0.6s ease both" }}>
+      {/* 卦名 */}
+      <div style={{ textAlign:"center", marginBottom:"28px" }}>
+        <div style={{ fontSize:"11px", letterSpacing:"5px", color:"rgba(180,140,60,0.4)", marginBottom:"8px" }}>本卦已成</div>
+        <div style={{ fontSize:"26px", fontWeight:"600", color:"#ffd700", letterSpacing:"8px" }}>{hexName}</div>
+        <div style={{ fontSize:"12px", color:"rgba(180,140,60,0.45)", marginTop:"4px" }}>
+          上{upperGua.name}（{upperGua.nature}）· 下{lowerGua.name}（{lowerGua.nature}）
+        </div>
+      </div>
+
+      {/* 卦象 */}
+      <div style={{
+        display:"grid", gridTemplateColumns: hasChanging ? "1fr auto 1fr" : "1fr",
+        gap:"12px", alignItems:"center",
+        padding:"20px", border:"1px solid rgba(180,140,60,0.15)",
+        borderRadius:"6px", background:"rgba(0,0,0,0.25)", marginBottom:"28px",
+      }}>
+        <div style={{ textAlign:"center" }}>
+          <HexagramDisplay lines={lines} animated={true} />
+          <div style={{ marginTop:"10px", fontSize:"12px", color:"#ffd700", letterSpacing:"3px" }}>{hexName}</div>
+        </div>
+        {hasChanging && <>
+          <div style={{ color:"rgba(180,140,60,0.35)", fontSize:"16px", textAlign:"center" }}>→</div>
+          <div style={{ textAlign:"center" }}>
+            <HexagramDisplay
+              lines={lines.map(l => ({ yin: l.changing ? !l.yin : l.yin, changing: false }))}
+              animated={true}
+            />
+            <div style={{ marginTop:"10px", fontSize:"12px", color:"#ff8c00", letterSpacing:"3px" }}>{changedHexName}</div>
+          </div>
+        </>}
+      </div>
+
+      {/* 签文 */}
+      <div style={{
+        position:"relative",
+        border:"1px solid rgba(180,140,60,0.35)",
+        borderRadius:"6px",
+        background:"linear-gradient(160deg, rgba(30,18,5,0.95) 0%, rgba(20,12,3,0.98) 100%)",
+        padding:"36px 28px 28px",
+        marginBottom:"28px",
+        boxShadow:"0 0 40px rgba(180,140,60,0.08), inset 0 0 60px rgba(0,0,0,0.3)",
+        overflow:"hidden",
+      }}>
+        {/* 装饰角 */}
+        {["topLeft","topRight","bottomLeft","bottomRight"].map(pos => (
+          <div key={pos} style={{
+            position:"absolute",
+            top: pos.includes("top") ? "8px" : "auto",
+            bottom: pos.includes("bottom") ? "8px" : "auto",
+            left: pos.includes("Left") ? "8px" : "auto",
+            right: pos.includes("Right") ? "8px" : "auto",
+            width:"16px", height:"16px",
+            borderTop: pos.includes("top") ? "1px solid rgba(180,140,60,0.4)" : "none",
+            borderBottom: pos.includes("bottom") ? "1px solid rgba(180,140,60,0.4)" : "none",
+            borderLeft: pos.includes("Left") ? "1px solid rgba(180,140,60,0.4)" : "none",
+            borderRight: pos.includes("Right") ? "1px solid rgba(180,140,60,0.4)" : "none",
+          }} />
+        ))}
+
+        {/* 签文标题 */}
+        <div style={{ textAlign:"center", marginBottom:"24px" }}>
+          <span style={{
+            fontSize:"11px", letterSpacing:"6px", color:"rgba(180,140,60,0.5)",
+            borderBottom:"1px solid rgba(180,140,60,0.2)", paddingBottom:"8px",
+          }}>
+            ✦ 卦 辞 签 文 ✦
+          </span>
+        </div>
+
+        {loading ? (
+          <div style={{ textAlign:"center", padding:"32px 0" }}>
+            <div style={{ fontSize:"22px", animation:"floatAnim 2s ease-in-out infinite", marginBottom:"12px" }}>☯</div>
+            <p style={{ color:"rgba(180,140,60,0.4)", letterSpacing:"4px", fontSize:"12px" }}>推演签文中…</p>
+          </div>
+        ) : (
+          <>
+            {/* 竖排签文 */}
+            <div style={{
+              display:"flex",
+              flexDirection:"row",
+              justifyContent:"center",
+              gap:"20px",
+              marginBottom:"20px",
+              minHeight:"120px",
+            }}>
+              {signLines.map((line, i) => (
+                <div key={i} style={{
+                  display:"flex",
+                  flexDirection:"column",
+                  alignItems:"center",
+                  gap:"6px",
+                  animation:`fadeUp 0.4s ease ${i * 0.15}s both`,
+                }}>
+                  {line.split("").map((char, j) => (
+                    <span key={j} style={{
+                      fontSize:"18px",
+                      color: i % 2 === 0 ? "rgba(255,220,120,0.92)" : "rgba(220,185,90,0.85)",
+                      lineHeight:"1.4",
+                      fontWeight: j === 0 ? "600" : "400",
+                      textShadow:"0 0 12px rgba(180,140,60,0.3)",
+                      letterSpacing:"1px",
+                    }}>
+                      {char}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+
+            {/* 分隔线 */}
+            <div style={{
+              width:"60%", margin:"0 auto 14px",
+              height:"1px",
+              background:"linear-gradient(90deg, transparent, rgba(180,140,60,0.3), transparent)",
+            }} />
+
+            {/* 出处 */}
+            {signSource && (
+              <div style={{ textAlign:"center", fontSize:"11px", color:"rgba(180,140,60,0.45)", letterSpacing:"2px" }}>
+                {signSource}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* 输入问题 + 解卦按钮 */}
+      <div style={{
+        border:"1px solid rgba(180,140,60,0.2)", borderRadius:"6px",
+        padding:"24px", background:"rgba(180,140,60,0.03)",
+      }}>
+        <label style={{ fontSize:"12px", letterSpacing:"3px", color:"rgba(180,140,60,0.6)", display:"block", marginBottom:"10px" }}>
+          此刻心中所问之事
+        </label>
+        <textarea
+          value={question}
+          onChange={e => setQuestion(e.target.value)}
+          placeholder="请写下您心中默念的问题，例如：此次求职能否顺利？"
+          rows={3}
+          style={{
+            width:"100%", padding:"14px",
+            background:"rgba(0,0,0,0.3)",
+            border:"1px solid rgba(180,140,60,0.25)", borderRadius:"4px",
+            color:"#e8d5a0", fontSize:"14px", fontFamily:"inherit",
+            resize:"none", outline:"none", lineHeight:"1.8",
+            marginBottom:"16px", boxSizing:"border-box",
+          }}
+        />
+        <button
+          onClick={() => question.trim() && onNext(question)}
+          disabled={!question.trim() || loading}
+          style={{
+            width:"100%", padding:"14px",
+            background: question.trim() && !loading
+              ? "linear-gradient(135deg, #8B6914 0%, #c8960c 50%, #8B6914 100%)"
+              : "rgba(180,140,60,0.1)",
+            border:"1px solid rgba(180,140,60,0.4)", borderRadius:"3px",
+            color: question.trim() && !loading ? "#fff8e0" : "rgba(180,140,60,0.3)",
+            fontSize:"15px", letterSpacing:"8px",
+            cursor: question.trim() && !loading ? "pointer" : "not-allowed",
+            fontFamily:"inherit", transition:"all 0.2s",
+          }}
+        >
+          解　卦
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── 主应用 ────────────────────────────────────────────────
+export default function App() {
+  // phase: intro | casting | sign | reading
+  const [phase, setPhase] = useState("intro");
   const [castLines, setCastLines] = useState([]);
   const [currentLine, setCurrentLine] = useState(0);
+  const [question, setQuestion] = useState("");
   const [interpretation, setInterpretation] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loadingRead, setLoadingRead] = useState(false);
 
   const lines = castLines.map(v => lineType(v));
-  const lowerLines = lines.slice(0,3).map(l => l.yin);
-  const upperLines = lines.slice(3,6).map(l => l.yin);
-  const lowerGua = lines.length === 6 ? getBagua(lowerLines) : null;
-  const upperGua = lines.length === 6 ? getBagua(upperLines) : null;
+  const lowerGua = lines.length === 6 ? getBagua(lines.slice(0,3).map(l=>l.yin)) : null;
+  const upperGua = lines.length === 6 ? getBagua(lines.slice(3,6).map(l=>l.yin)) : null;
   const hexName = lowerGua && upperGua ? getHexagramName(lowerGua, upperGua) : "";
   const hasChanging = lines.some(l => l.changing);
   const changedLines = lines.map(l => ({ yin: l.changing ? !l.yin : l.yin, changing: false }));
@@ -164,19 +389,13 @@ export default function App() {
       setCurrentLine(next.length);
     } else {
       setCurrentLine(6);
-      setTimeout(() => setPhase("result"), 500);
+      setTimeout(() => setPhase("sign"), 500);
     }
   };
 
-  const startCasting = () => {
-    if (!question.trim()) return;
-    setCastLines([]); setCurrentLine(0); setInterpretation("");
-    setPhase("casting");
-  };
-
-  // ★ 关键：调用的是 /api/chat，而不是直接调用 Anthropic
-  const askAI = async () => {
-    setLoading(true);
+  const handleReading = async (q) => {
+    setQuestion(q);
+    setLoadingRead(true);
     setInterpretation("");
     setPhase("reading");
 
@@ -186,7 +405,7 @@ export default function App() {
 
     const prompt = `你是一位精通周易六爻的易学大师，请为以下六爻卦象进行详细解读。
 
-【所问之事】${question}
+【所问之事】${q}
 【本卦】${hexName}
 上卦：${upperGua?.name}（${upperGua?.nature}）
 下卦：${lowerGua?.name}（${lowerGua?.nature}）
@@ -213,10 +432,9 @@ ${hasChanging ? "\n**【变卦启示】**\n结合变卦预测发展走向" : ""}
 以"大吉/吉/中平/凶/大凶"评定并说明原因`;
 
     try {
-      // 调用我们自己的后端接口，不暴露API Key
       const resp = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
         body: JSON.stringify({ prompt }),
       });
       const data = await resp.json();
@@ -228,130 +446,180 @@ ${hasChanging ? "\n**【变卦启示】**\n结合变卦预测发展走向" : ""}
     } catch {
       setInterpretation("连接失败，请重试。");
     } finally {
-      setLoading(false);
+      setLoadingRead(false);
     }
   };
 
   const reset = () => {
-    setPhase("intro"); setQuestion(""); setCastLines([]);
-    setCurrentLine(0); setInterpretation("");
+    setPhase("intro"); setCastLines([]); setCurrentLine(0);
+    setQuestion(""); setInterpretation("");
   };
 
   return (
     <div style={{
       minHeight:"100vh", background:"#0d0a06", color:"#e8d5a0",
       fontFamily:"'Noto Serif SC', 'SimSun', serif",
-      position:"relative", overflow:"hidden",
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&display=swap');
-        @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        * { box-sizing: border-box; }
-        strong { color: #ffd700; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes floatAnim { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+        * { box-sizing:border-box; }
+        strong { color:#ffd700; }
         ::-webkit-scrollbar{width:4px}
         ::-webkit-scrollbar-thumb{background:#8B6914;border-radius:2px}
+        textarea::placeholder { color: rgba(180,140,60,0.3); }
       `}</style>
 
-      <div style={{ position:"fixed", inset:0, pointerEvents:"none",
-        backgroundImage:`radial-gradient(ellipse at 20% 20%, rgba(180,140,60,0.08) 0%, transparent 60%),
-          radial-gradient(ellipse at 80% 80%, rgba(120,60,20,0.08) 0%, transparent 60%)` }} />
+      {/* 背景 */}
+      <div style={{
+        position:"fixed", inset:0, pointerEvents:"none", zIndex:0,
+        backgroundImage:`radial-gradient(ellipse at 15% 15%, rgba(180,140,60,0.07) 0%, transparent 55%),
+          radial-gradient(ellipse at 85% 85%, rgba(120,60,20,0.07) 0%, transparent 55%)`,
+      }} />
 
-      <div style={{ position:"relative", zIndex:1, maxWidth:"660px", margin:"0 auto", padding:"40px 20px" }}>
+      <div style={{ position:"relative", zIndex:1, maxWidth:"640px", margin:"0 auto", padding:"40px 20px" }}>
 
         {/* 标题 */}
         <header style={{ textAlign:"center", marginBottom:"44px" }}>
-          <div style={{ fontSize:"11px", letterSpacing:"8px", color:"rgba(180,140,60,0.4)", marginBottom:"10px" }}>
+          <div style={{ fontSize:"11px", letterSpacing:"8px", color:"rgba(180,140,60,0.35)", marginBottom:"10px" }}>
             ☰ ☷ ☲ ☵ ☶ ☱ ☴ ☳
           </div>
-          <h1 style={{ fontSize:"30px", fontWeight:"300", letterSpacing:"12px", margin:"0 0 6px", color:"#ffd700" }}>
+          <h1 style={{ fontSize:"28px", fontWeight:"300", letterSpacing:"12px", margin:"0 0 6px", color:"#ffd700" }}>
             六爻卜卦
           </h1>
-          <p style={{ fontSize:"11px", color:"rgba(180,140,60,0.4)", letterSpacing:"4px", margin:0 }}>
+          <p style={{ fontSize:"11px", color:"rgba(180,140,60,0.35)", letterSpacing:"4px", margin:0 }}>
             铜钱起卦 · 周易六十四卦 · AI解读
           </p>
         </header>
 
-        {/* INTRO */}
+        {/* ── PHASE: INTRO ── */}
         {phase === "intro" && (
-          <div style={{ animation:"fadeIn 0.8s ease both" }}>
+          <div style={{ animation:"fadeUp 0.8s ease both" }}>
             <div style={{
               border:"1px solid rgba(180,140,60,0.2)", borderRadius:"8px",
-              padding:"32px", background:"rgba(180,140,60,0.03)", marginBottom:"28px",
+              padding:"44px 36px", background:"rgba(180,140,60,0.03)",
+              textAlign:"center", marginBottom:"28px",
             }}>
-              <p style={{ fontSize:"13px", lineHeight:"2.2", color:"rgba(232,213,160,0.6)", marginBottom:"24px", textAlign:"center" }}>
-                心存一事，默念三遍，方可起卦<br/>诚心诚意，则卦象应验
-              </p>
-              <label style={{ fontSize:"12px", letterSpacing:"3px", color:"rgba(180,140,60,0.6)", display:"block", marginBottom:"10px" }}>
-                所问之事
-              </label>
-              <textarea
-                value={question}
-                onChange={e => setQuestion(e.target.value)}
-                placeholder="请输入您想占问的事情，例如：此次求职能否顺利？"
-                rows={3}
-                style={{
-                  width:"100%", padding:"14px",
-                  background:"rgba(0,0,0,0.3)",
-                  border:"1px solid rgba(180,140,60,0.25)", borderRadius:"4px",
-                  color:"#e8d5a0", fontSize:"14px", fontFamily:"inherit",
-                  resize:"none", outline:"none", lineHeight:"1.8", marginBottom:"16px",
-                }}
-              />
-              <button onClick={startCasting} disabled={!question.trim()} style={{
-                width:"100%", padding:"14px",
-                background: question.trim()
-                  ? "linear-gradient(135deg, #8B6914 0%, #c8960c 50%, #8B6914 100%)"
-                  : "rgba(180,140,60,0.1)",
-                border:"1px solid rgba(180,140,60,0.4)", borderRadius:"4px",
-                color: question.trim() ? "#fff8e0" : "rgba(180,140,60,0.3)",
-                fontSize:"15px", letterSpacing:"6px",
-                cursor: question.trim() ? "pointer" : "not-allowed",
-                fontFamily:"inherit",
+              {/* 太极图 */}
+              <div style={{
+                fontSize:"56px", marginBottom:"28px",
+                animation:"floatAnim 4s ease-in-out infinite",
+                filter:"drop-shadow(0 0 20px rgba(180,140,60,0.3))",
+              }}>☯</div>
+
+              <p style={{
+                fontSize:"15px", lineHeight:"2.6", color:"rgba(232,213,160,0.75)",
+                marginBottom:"12px", letterSpacing:"2px",
               }}>
+                请于心中默念所问之事
+              </p>
+              <p style={{
+                fontSize:"13px", lineHeight:"2.2", color:"rgba(180,140,60,0.5)",
+                marginBottom:"36px", letterSpacing:"1px",
+              }}>
+                反复默念三遍<br/>
+                心神专注，方可感应天地
+              </p>
+
+              {/* 三次默念提示 */}
+              <div style={{ display:"flex", justifyContent:"center", gap:"20px", marginBottom:"36px" }}>
+                {["一念", "再念", "三念"].map((text, i) => (
+                  <div key={i} style={{
+                    display:"flex", flexDirection:"column", alignItems:"center", gap:"6px",
+                    animation:`fadeUp 0.5s ease ${0.3 + i * 0.2}s both`,
+                  }}>
+                    <div style={{
+                      width:"36px", height:"36px", borderRadius:"50%",
+                      border:"1px solid rgba(180,140,60,0.3)",
+                      display:"flex", alignItems:"center", justifyContent:"center",
+                      fontSize:"18px", color:"rgba(180,140,60,0.4)",
+                    }}>
+                      {["一","二","三"][i]}
+                    </div>
+                    <span style={{ fontSize:"11px", color:"rgba(180,140,60,0.35)", letterSpacing:"1px" }}>{text}</span>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setPhase("casting")}
+                style={{
+                  padding:"15px 48px",
+                  background:"linear-gradient(135deg, #8B6914 0%, #c8960c 50%, #8B6914 100%)",
+                  border:"1px solid rgba(180,140,60,0.5)", borderRadius:"3px",
+                  color:"#fff8e0", fontSize:"15px", letterSpacing:"8px",
+                  cursor:"pointer", fontFamily:"inherit",
+                  boxShadow:"0 4px 20px rgba(180,140,60,0.2)",
+                }}
+              >
                 开始起卦
               </button>
             </div>
+
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"10px" }}>
               {[
-                { icon:"🪙", title:"铜钱起卦", desc:"三枚铜钱掷六次，正面3反面2" },
-                { icon:"☯", title:"动爻变化", desc:"老阴老阳为动爻，可推变卦" },
-                { icon:"🤖", title:"AI解卦", desc:"易学大师角色，详细解读卦象" },
+                { icon:"🪙", title:"铜钱起卦", desc:"三枚铜钱掷六次" },
+                { icon:"📜", title:"签文判词", desc:"古雅签文玄机" },
+                { icon:"🤖", title:"AI解卦", desc:"易学大师详解" },
               ].map(item => (
                 <div key={item.title} style={{
-                  padding:"16px 12px", border:"1px solid rgba(180,140,60,0.12)",
+                  padding:"16px 10px", border:"1px solid rgba(180,140,60,0.1)",
                   borderRadius:"6px", textAlign:"center", background:"rgba(180,140,60,0.02)",
                 }}>
-                  <div style={{ fontSize:"22px", marginBottom:"8px" }}>{item.icon}</div>
-                  <div style={{ fontSize:"12px", color:"#ffd700", letterSpacing:"1px", marginBottom:"6px" }}>{item.title}</div>
-                  <div style={{ fontSize:"11px", color:"rgba(180,140,60,0.5)", lineHeight:"1.6" }}>{item.desc}</div>
+                  <div style={{ fontSize:"20px", marginBottom:"8px" }}>{item.icon}</div>
+                  <div style={{ fontSize:"12px", color:"#ffd700", letterSpacing:"1px", marginBottom:"5px" }}>{item.title}</div>
+                  <div style={{ fontSize:"11px", color:"rgba(180,140,60,0.45)", lineHeight:"1.6" }}>{item.desc}</div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* CASTING */}
+        {/* ── PHASE: CASTING ── */}
         {phase === "casting" && (
-          <div style={{ animation:"fadeIn 0.5s ease both" }}>
+          <div style={{ animation:"fadeUp 0.5s ease both" }}>
             <div style={{
               border:"1px solid rgba(180,140,60,0.2)", borderRadius:"8px",
-              padding:"28px", background:"rgba(180,140,60,0.03)", marginBottom:"20px", textAlign:"center",
+              padding:"32px", background:"rgba(180,140,60,0.03)",
+              marginBottom:"20px", textAlign:"center",
             }}>
-              <p style={{ fontSize:"12px", color:"rgba(180,140,60,0.5)", letterSpacing:"3px", marginBottom:"4px" }}>
-                第 {currentLine + 1} 爻（共六爻）
+              <div style={{ marginBottom:"6px" }}>
+                <span style={{ fontSize:"11px", color:"rgba(180,140,60,0.4)", letterSpacing:"4px" }}>
+                  起第
+                </span>
+                <span style={{ fontSize:"22px", color:"#ffd700", margin:"0 8px" }}>
+                  {["初","二","三","四","五","上"][currentLine]}
+                </span>
+                <span style={{ fontSize:"11px", color:"rgba(180,140,60,0.4)", letterSpacing:"4px" }}>
+                  爻
+                </span>
+              </div>
+              <p style={{ fontSize:"11px", color:"rgba(180,140,60,0.3)", marginBottom:"28px", letterSpacing:"2px" }}>
+                {["地基之爻","人事之爻","动变之爻","官鬼之爻","君位之爻","天机之爻"][currentLine]}
               </p>
-              <p style={{ fontSize:"11px", color:"rgba(180,140,60,0.35)", marginBottom:"24px" }}>
-                {["初爻·地基","二爻·人事","三爻·动变","四爻·官鬼","五爻·君位","上爻·天机"][currentLine]}
-              </p>
+
+              {/* 进度 */}
+              <div style={{ display:"flex", justifyContent:"center", gap:"8px", marginBottom:"28px" }}>
+                {[0,1,2,3,4,5].map(i => (
+                  <div key={i} style={{
+                    width:"8px", height:"8px", borderRadius:"50%",
+                    background: i < castLines.length ? "#ffd700" : i === castLines.length ? "rgba(255,215,0,0.5)" : "rgba(180,140,60,0.15)",
+                    transition:"all 0.3s",
+                  }} />
+                ))}
+              </div>
+
               <CoinFlip onResult={handleCoinResult} />
             </div>
+
             {castLines.length > 0 && (
               <div style={{
-                border:"1px solid rgba(180,140,60,0.15)", borderRadius:"8px",
-                padding:"24px", background:"rgba(0,0,0,0.2)", textAlign:"center",
+                border:"1px solid rgba(180,140,60,0.12)", borderRadius:"8px",
+                padding:"22px", background:"rgba(0,0,0,0.2)", textAlign:"center",
               }}>
-                <p style={{ fontSize:"11px", color:"rgba(180,140,60,0.4)", letterSpacing:"3px", marginBottom:"16px" }}>已得爻位</p>
+                <p style={{ fontSize:"11px", color:"rgba(180,140,60,0.35)", letterSpacing:"3px", marginBottom:"14px" }}>已成爻象</p>
                 <HexagramDisplay
                   lines={lines.concat(Array(6-lines.length).fill({yin:false,changing:false}))}
                   animated={true}
@@ -361,87 +629,82 @@ ${hasChanging ? "\n**【变卦启示】**\n结合变卦预测发展走向" : ""}
           </div>
         )}
 
-        {/* RESULT & READING */}
-        {(phase === "result" || phase === "reading") && lowerGua && upperGua && (
-          <div style={{ animation:"fadeIn 0.6s ease both" }}>
-            <div style={{ textAlign:"center", marginBottom:"28px" }}>
-              <div style={{ fontSize:"11px", letterSpacing:"4px", color:"rgba(180,140,60,0.5)", marginBottom:"8px" }}>本卦</div>
-              <div style={{ fontSize:"28px", fontWeight:"600", color:"#ffd700", letterSpacing:"6px", marginBottom:"4px" }}>{hexName}</div>
-              <div style={{ fontSize:"12px", color:"rgba(180,140,60,0.5)" }}>
-                上{upperGua.name}（{upperGua.nature}）· 下{lowerGua.name}（{lowerGua.nature}）
-              </div>
+        {/* ── PHASE: SIGN ── */}
+        {phase === "sign" && lowerGua && upperGua && (
+          <SignPage
+            hexName={hexName}
+            lowerGua={lowerGua}
+            upperGua={upperGua}
+            hasChanging={hasChanging}
+            changedHexName={changedHexName}
+            lines={lines}
+            castLines={castLines}
+            onNext={handleReading}
+          />
+        )}
+
+        {/* ── PHASE: READING ── */}
+        {phase === "reading" && lowerGua && upperGua && (
+          <div style={{ animation:"fadeUp 0.6s ease both" }}>
+            <div style={{ textAlign:"center", marginBottom:"24px" }}>
+              <div style={{ fontSize:"11px", letterSpacing:"4px", color:"rgba(180,140,60,0.4)", marginBottom:"8px" }}>卦象解读</div>
+              <div style={{ fontSize:"24px", fontWeight:"600", color:"#ffd700", letterSpacing:"6px" }}>{hexName}</div>
             </div>
 
             <div style={{
-              display:"grid",
-              gridTemplateColumns: hasChanging ? "1fr auto 1fr" : "1fr",
-              gap:"16px", alignItems:"center",
-              padding:"28px", border:"1px solid rgba(180,140,60,0.2)",
-              borderRadius:"8px", background:"rgba(0,0,0,0.3)", marginBottom:"20px",
+              display:"grid", gridTemplateColumns: hasChanging ? "1fr auto 1fr" : "1fr",
+              gap:"12px", alignItems:"center",
+              padding:"20px", border:"1px solid rgba(180,140,60,0.15)",
+              borderRadius:"6px", background:"rgba(0,0,0,0.25)", marginBottom:"20px",
             }}>
               <div style={{ textAlign:"center" }}>
-                <div style={{ fontSize:"11px", color:"rgba(180,140,60,0.4)", letterSpacing:"3px", marginBottom:"14px" }}>本卦</div>
                 <HexagramDisplay lines={lines} animated={true} />
-                <div style={{ marginTop:"10px", fontSize:"13px", color:"#ffd700", letterSpacing:"3px" }}>{hexName}</div>
+                <div style={{ marginTop:"10px", fontSize:"12px", color:"#ffd700", letterSpacing:"3px" }}>{hexName}</div>
               </div>
               {hasChanging && <>
-                <div style={{ color:"rgba(180,140,60,0.4)", fontSize:"18px", textAlign:"center" }}>→</div>
+                <div style={{ color:"rgba(180,140,60,0.35)", fontSize:"16px", textAlign:"center" }}>→</div>
                 <div style={{ textAlign:"center" }}>
-                  <div style={{ fontSize:"11px", color:"rgba(255,140,0,0.5)", letterSpacing:"3px", marginBottom:"14px" }}>变卦</div>
                   <HexagramDisplay lines={changedLines} animated={true} />
-                  <div style={{ marginTop:"10px", fontSize:"13px", color:"#ff8c00", letterSpacing:"3px" }}>{changedHexName}</div>
+                  <div style={{ marginTop:"10px", fontSize:"12px", color:"#ff8c00", letterSpacing:"3px" }}>{changedHexName}</div>
                 </div>
               </>}
             </div>
 
-            {hasChanging && (
+            {question && (
               <div style={{
-                padding:"10px 16px", border:"1px solid rgba(255,140,0,0.2)",
-                borderRadius:"4px", background:"rgba(255,140,0,0.04)",
-                marginBottom:"16px", fontSize:"12px", color:"rgba(255,180,60,0.7)",
+                padding:"10px 16px", marginBottom:"16px",
+                border:"1px solid rgba(180,140,60,0.15)", borderRadius:"4px",
+                background:"rgba(180,140,60,0.03)", fontSize:"13px",
+                color:"rgba(180,140,60,0.6)", letterSpacing:"1px",
               }}>
-                动爻：{lines.map((l,i) => l.changing ? `${["初","二","三","四","五","上"][i]}爻（${l.yin?"老阴":"老阳"}）` : null).filter(Boolean).join("、")}
+                所问：{question}
               </div>
             )}
 
-            {phase === "result" && (
-              <button onClick={askAI} style={{
-                width:"100%", padding:"16px",
-                background:"linear-gradient(135deg, #5a3e10 0%, #8B6914 50%, #5a3e10 100%)",
-                border:"1px solid rgba(180,140,60,0.5)", borderRadius:"4px",
-                color:"#ffd700", fontSize:"15px", letterSpacing:"6px",
-                cursor:"pointer", fontFamily:"inherit", marginBottom:"12px",
-              }}>
-                ✦ 请AI大师解卦 ✦
-              </button>
-            )}
-
-            {phase === "reading" && (
-              <div style={{
-                border:"1px solid rgba(180,140,60,0.2)", borderRadius:"8px",
-                padding:"28px", background:"rgba(0,0,0,0.3)", marginBottom:"16px",
-              }}>
-                <div style={{ fontSize:"11px", letterSpacing:"4px", color:"rgba(180,140,60,0.4)", marginBottom:"20px", textAlign:"center" }}>
-                  — 卦 象 解 读 —
+            <div style={{
+              border:"1px solid rgba(180,140,60,0.2)", borderRadius:"8px",
+              padding:"28px", background:"rgba(0,0,0,0.3)", marginBottom:"16px",
+            }}>
+              <div style={{ fontSize:"11px", letterSpacing:"4px", color:"rgba(180,140,60,0.35)", marginBottom:"20px", textAlign:"center" }}>
+                — 大 师 解 读 —
+              </div>
+              {loadingRead ? (
+                <div style={{ textAlign:"center", padding:"40px 0" }}>
+                  <div style={{ fontSize:"26px", animation:"floatAnim 2s ease-in-out infinite", marginBottom:"12px" }}>☯</div>
+                  <p style={{ color:"rgba(180,140,60,0.4)", letterSpacing:"4px", fontSize:"12px" }}>大师推演中…</p>
                 </div>
-                {loading ? (
-                  <div style={{ textAlign:"center", padding:"40px 0" }}>
-                    <div style={{ fontSize:"28px", animation:"float 2s ease-in-out infinite", marginBottom:"14px" }}>☯</div>
-                    <p style={{ color:"rgba(180,140,60,0.5)", letterSpacing:"4px", fontSize:"13px" }}>大师推演中...</p>
-                  </div>
-                ) : (
-                  <div
-                    style={{ fontSize:"14px", lineHeight:"2.2", color:"rgba(232,213,160,0.85)", whiteSpace:"pre-wrap" }}
-                    dangerouslySetInnerHTML={{ __html: interpretation.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
-                  />
-                )}
-              </div>
-            )}
+              ) : (
+                <div
+                  style={{ fontSize:"14px", lineHeight:"2.2", color:"rgba(232,213,160,0.85)", whiteSpace:"pre-wrap" }}
+                  dangerouslySetInnerHTML={{ __html: interpretation.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
+                />
+              )}
+            </div>
 
             <button onClick={reset} style={{
               width:"100%", padding:"12px", background:"transparent",
-              border:"1px solid rgba(180,140,60,0.2)", borderRadius:"4px",
-              color:"rgba(180,140,60,0.5)", fontSize:"13px", letterSpacing:"4px",
+              border:"1px solid rgba(180,140,60,0.18)", borderRadius:"4px",
+              color:"rgba(180,140,60,0.45)", fontSize:"13px", letterSpacing:"4px",
               cursor:"pointer", fontFamily:"inherit",
             }}>
               重新起卦
@@ -449,7 +712,7 @@ ${hasChanging ? "\n**【变卦启示】**\n结合变卦预测发展走向" : ""}
           </div>
         )}
 
-        <footer style={{ textAlign:"center", marginTop:"48px", fontSize:"11px", color:"rgba(180,140,60,0.2)", letterSpacing:"3px" }}>
+        <footer style={{ textAlign:"center", marginTop:"48px", fontSize:"10px", color:"rgba(180,140,60,0.2)", letterSpacing:"3px" }}>
           易有太极，是生两仪，两仪生四象，四象生八卦
         </footer>
       </div>
